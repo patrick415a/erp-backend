@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.service.RolePermissionService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,10 +36,11 @@ public class SecurityConfig {
     // 개발 편의를 위한 기본 시큐리티 설정 (CORS, CSRF 비활성화 및 회원가입 URL 허용)
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtProvider jwtProvider,
-            MemberRepository members, RolePermissionService permissions) throws Exception {
+            MemberRepository members, RolePermissionService permissions,
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configure(http))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(new ErpAuthorizationFilter(jwtProvider, members, permissions), AnonymousAuthenticationFilter.class)
@@ -73,10 +75,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(@Value("${RENDER:false}") boolean onRender) {
         CorsConfiguration configuration = new CorsConfiguration();
         // 💡 프론트엔드 주소 허용 (포트 번호 주의)
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "http://localhost:3001"));
+        configuration.setAllowedOrigins(onRender
+                ? List.of("http://heartbreakkid.co.kr")
+                : List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "http://localhost:3001"));
         // 💡 허용할 HTTP 메서드
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

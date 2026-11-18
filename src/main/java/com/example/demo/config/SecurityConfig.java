@@ -82,7 +82,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // 💡 프론트엔드 주소 허용 (포트 번호 주의)
         configuration.setAllowedOrigins(onRender
-                ? List.of("http://heartbreakkid.co.kr")
+                ? List.of("http://heartbreakkid.co.kr", "http://www.heartbreakkid.co.kr",
+                        "https://heartbreakkid.co.kr", "https://www.heartbreakkid.co.kr")
                 : List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "http://localhost:3001"));
         if (!redirectUri.isBlank()) {
             configuration.addAllowedOrigin(UriComponentsBuilder.fromUriString(redirectUri)

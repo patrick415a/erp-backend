@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -75,12 +76,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(@Value("${RENDER:false}") boolean onRender) {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${RENDER:false}") boolean onRender,
+            @Value("${ERP_OAUTH_REDIRECT_URI:}") String redirectUri) {
         CorsConfiguration configuration = new CorsConfiguration();
         // 💡 프론트엔드 주소 허용 (포트 번호 주의)
         configuration.setAllowedOrigins(onRender
                 ? List.of("http://heartbreakkid.co.kr")
                 : List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "http://localhost:3001"));
+        if (!redirectUri.isBlank()) {
+            configuration.addAllowedOrigin(UriComponentsBuilder.fromUriString(redirectUri)
+                    .replacePath(null).replaceQuery(null).fragment(null).build().toUriString());
+        }
         // 💡 허용할 HTTP 메서드
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

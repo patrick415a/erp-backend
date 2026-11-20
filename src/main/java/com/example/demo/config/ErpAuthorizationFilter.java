@@ -28,6 +28,7 @@ public class ErpAuthorizationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return !path.startsWith("/api/") || path.startsWith("/api/members/")
+                || ("GET".equals(request.getMethod()) && "/api/status".equals(path))
                 || ("GET".equals(request.getMethod()) && ("/api/system/appearance".equals(path) || "/api/system/logo".equals(path)))
                 || "OPTIONS".equals(request.getMethod());
     }

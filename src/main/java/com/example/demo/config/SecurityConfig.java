@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(new ErpAuthorizationFilter(jwtProvider, members, permissions), AnonymousAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/api/status").permitAll()
                         .requestMatchers("/api/members/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/access").authenticated()
                         .requestMatchers("/api/settings/permissions", "/api/settings/permissions/*").hasRole("SYSTEM_ADMIN")
@@ -95,6 +96,11 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration statusCors = new CorsConfiguration();
+        statusCors.setAllowedOrigins(List.of("*"));
+        statusCors.setAllowedMethods(List.of("GET", "HEAD", "OPTIONS"));
+        statusCors.setAllowedHeaders(List.of("*"));
+        source.registerCorsConfiguration("/api/status", statusCors);
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 적용
         return source;
     }
